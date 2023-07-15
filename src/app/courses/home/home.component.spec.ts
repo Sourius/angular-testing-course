@@ -1,4 +1,4 @@
-import { async, ComponentFixture, fakeAsync, flush, flushMicrotasks, TestBed, tick } from '@angular/core/testing';
+import { async, ComponentFixture, fakeAsync, flush, flushMicrotasks, TestBed, tick, waitForAsync } from '@angular/core/testing';
 import { CoursesModule } from '../courses.module';
 import { DebugElement } from '@angular/core';
 
@@ -22,7 +22,7 @@ describe('HomeComponent', () => {
   const beginnerCourses = setupCourses().filter(course => course.category == 'BEGINNER');
   const advancedCourses = setupCourses().filter(course => course.category == 'ADVANCED')
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     const coursesServiceSpy = jasmine.createSpyObj('CoursesService', ['findAllCourses']);
     TestBed.configureTestingModule({
       imports: [CoursesModule, NoopAnimationsModule],
@@ -111,51 +111,6 @@ describe('HomeComponent', () => {
     coursesService.findAllCourses.and.returnValue(
       of(setupCourses())
     );
-    const advancedCourseTitleList = advancedCourses.map(advancedCourse => advancedCourse.titles.description);
-
-    fixture.detectChanges();
-    const tabs = el.queryAll(By.css('.mat-mdc-tab'));
-    expect(tabs.length).toBe(2, 'Unexpected number of tabs');
-
-    click(tabs[1]);
-    fixture.detectChanges();
-
-    let courseTitleList = null;
-    setTimeout(() => {
-      courseTitleList = el.queryAll(By.css('.mat-mdc-tab-body-active .mat-mdc-card-title'))
-        .map(element => element.nativeElement.innerText);
-    }, 500);
-
-    tick(500);
-    expect(courseTitleList).toEqual(advancedCourseTitleList, "Unknown advance courses");
-  }));
-
-  xit("should display advanced courses when tab clicked v3", fakeAsync(() => {
-    coursesService.findAllCourses.and.returnValue(
-      of(setupCourses())
-    );
-    const advancedCourseTitleList = advancedCourses.map(advancedCourse => advancedCourse.titles.description);
-
-    fixture.detectChanges();
-    const tabs = el.queryAll(By.css('.mat-mdc-tab'));
-    expect(tabs.length).toBe(2, 'Unexpected number of tabs');
-
-    click(tabs[1]);
-    fixture.detectChanges();
-
-    let courseTitleList = null;
-    setTimeout(() => {
-      courseTitleList = el.queryAll(By.css('.mat-mdc-tab-body-active .mat-mdc-card-title')).map(element => element.nativeElement.innerText);
-    }, 500);
-
-    flush();
-    expect(courseTitleList).toEqual(advancedCourseTitleList, "Unknown advance courses");
-  }));
-
-  xit("should display advanced courses when tab clicked v4", fakeAsync(() => {
-    coursesService.findAllCourses.and.returnValue(
-      of(setupCourses())
-    );
     fixture.detectChanges();
 
     const tabs = el.queryAll(By.css('.mat-mdc-tab'));
@@ -163,6 +118,7 @@ describe('HomeComponent', () => {
 
     click(tabs[1]);
     fixture.detectChanges();
+    // tick(500);
     flush();
 
     const advancedCourseTitleList = advancedCourses.map(advancedCourse => advancedCourse.titles.description);
@@ -171,7 +127,7 @@ describe('HomeComponent', () => {
     expect(courseTitleList).toEqual(advancedCourseTitleList, "Unknown advance courses");
   }));
 
-  fit("should display advanced courses when tab clicked v5", () => {
+  xit("should display advanced courses when tab clicked v3", () => {
     coursesService.findAllCourses.and.returnValue(
       of(setupCourses())
     );
@@ -193,6 +149,26 @@ describe('HomeComponent', () => {
     );
   });
 
+  fit("should display advanced courses when tab clicked v4", waitForAsync(() => {
+    coursesService.findAllCourses.and.returnValue(
+      of(setupCourses())
+    );
+
+    fixture.detectChanges();
+    const tabs = el.queryAll(By.css('.mat-mdc-tab'));
+    expect(tabs.length).toBe(2, 'Unexpected number of tabs');
+
+    click(tabs[1]);
+    fixture.detectChanges();
+
+    fixture.whenStable().then(() => {
+      const advancedCourseTitleList = advancedCourses.map(advancedCourse => advancedCourse.titles.description);
+      const courseTitleList = el.queryAll(By.css('.mat-mdc-tab-body-active .mat-mdc-card-title'))
+        .map(element => element.nativeElement.innerText);
+      expect(courseTitleList).toEqual(advancedCourseTitleList, "Unknown advance courses");
+    });
+
+  }));
 });
 
 
