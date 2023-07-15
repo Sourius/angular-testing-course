@@ -149,7 +149,7 @@ describe('HomeComponent', () => {
     );
   });
 
-  fit("should display advanced courses when tab clicked v4", waitForAsync(() => {
+  it("should display advanced courses when tab clicked v4", waitForAsync(() => {
     coursesService.findAllCourses.and.returnValue(
       of(setupCourses())
     );
