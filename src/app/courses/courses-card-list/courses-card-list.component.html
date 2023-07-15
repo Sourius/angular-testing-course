@@ -1,4 +1,4 @@
-<mat-card *ngFor="let course of courses" class="c-courses-card-list__course-card u-mat-elevation-z10">
+<mat-card *ngFor="let course of courses" class="c-course-card u-mat-elevation-z10">
     <mat-card-header>
         <mat-card-title>{{course.titles.description}}</mat-card-title>
     </mat-card-header>
@@ -9,16 +9,16 @@
         <p>{{course.titles.longDescription}}</p>
     </mat-card-content>
 
-    <mat-card-actions class="c-courses-card-list__course-actions">
+    <mat-card-actions class="c-course-card__actions">
         <button 
-            class="c-courses-card-list__course-actions c-courses-card-list__course-actions--button" 
+            class="c-course-card__actions__button" 
             mat-raised-button 
             color="primary"
             [routerLink]="['/courses', course.id]"
         >VIEW COURSE</button>
 
         <button 
-            class="c-courses-card-list__course-actions c-courses-card-list__course-actions--button" 
+            class="c-course-card__actions__button" 
             mat-raised-button 
             color="accent"
             (click)="editCourse(course)"
