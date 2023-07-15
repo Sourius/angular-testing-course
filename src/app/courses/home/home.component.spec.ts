@@ -1,4 +1,4 @@
-import { async, ComponentFixture, fakeAsync, flush, flushMicrotasks, TestBed } from '@angular/core/testing';
+import { async, ComponentFixture, fakeAsync, flush, flushMicrotasks, TestBed, tick } from '@angular/core/testing';
 import { CoursesModule } from '../courses.module';
 import { DebugElement } from '@angular/core';
 
@@ -15,7 +15,6 @@ import { click } from '../common/test-utils';
 import { Course } from '../model/course';
 
 describe('HomeComponent', () => {
-
   let fixture: ComponentFixture<HomeComponent>;
   let component: HomeComponent;
   let el: DebugElement;
@@ -45,7 +44,6 @@ describe('HomeComponent', () => {
     expect(component).toBeTruthy();
   });
 
-
   it("should display only beginner courses", () => {
     coursesService.findAllCourses.and.returnValue(
       of(beginnerCourses)
@@ -61,7 +59,6 @@ describe('HomeComponent', () => {
     expect(beginnersTab.nativeElement.innerText).toEqual('Beginners', 'Unexpected tab');
   });
 
-
   it("should display only advanced courses", () => {
     coursesService.findAllCourses.and.returnValue(
       of(advancedCourses)
@@ -73,7 +70,6 @@ describe('HomeComponent', () => {
     const beginnersTab = el.query(By.css('.mdc-tab__text-label'));
     expect(beginnersTab.nativeElement.innerText).toEqual('Advanced', 'Unexpected tab');
   });
-
 
   it("should display both tabs", () => {
     coursesService.findAllCourses.and.returnValue(
@@ -91,23 +87,110 @@ describe('HomeComponent', () => {
     expect(tabTexts[1]).toEqual('Advanced', 'Unexpected tab');
   });
 
-  xit("should display advanced courses when tab clicked", (done: DoneFn) => {
+  xit("should display advanced courses when tab clicked v1", (done: DoneFn) => {
     coursesService.findAllCourses.and.returnValue(
       of(setupCourses())
     );
     fixture.detectChanges();
     const tabs = el.queryAll(By.css('.mat-mdc-tab'));
     // expect(tabs.length).toBe(2, 'Unexpected number of tabs');
-    
+
     click(tabs[1]);
     fixture.detectChanges();
 
     setTimeout(() => {
-      const courseTitleList = el.queryAll(By.css('.mat-mdc-card-title')).map(element => element.nativeElement.innerText);
+      const courseTitleList = el.queryAll(By.css('.mat-mdc-tab-body-active .mat-mdc-card-title'))
+        .map(element => element.nativeElement.innerText);
       const advancedCourseTitleList = advancedCourses.map(advancedCourse => advancedCourse.titles.description);
       expect(courseTitleList).toEqual(advancedCourseTitleList, "Unknown advance courses");
       done();
     }, 500);
+  });
+
+  xit("should display advanced courses when tab clicked v2", fakeAsync(() => {
+    coursesService.findAllCourses.and.returnValue(
+      of(setupCourses())
+    );
+    const advancedCourseTitleList = advancedCourses.map(advancedCourse => advancedCourse.titles.description);
+
+    fixture.detectChanges();
+    const tabs = el.queryAll(By.css('.mat-mdc-tab'));
+    expect(tabs.length).toBe(2, 'Unexpected number of tabs');
+
+    click(tabs[1]);
+    fixture.detectChanges();
+
+    let courseTitleList = null;
+    setTimeout(() => {
+      courseTitleList = el.queryAll(By.css('.mat-mdc-tab-body-active .mat-mdc-card-title'))
+        .map(element => element.nativeElement.innerText);
+    }, 500);
+
+    tick(500);
+    expect(courseTitleList).toEqual(advancedCourseTitleList, "Unknown advance courses");
+  }));
+
+  xit("should display advanced courses when tab clicked v3", fakeAsync(() => {
+    coursesService.findAllCourses.and.returnValue(
+      of(setupCourses())
+    );
+    const advancedCourseTitleList = advancedCourses.map(advancedCourse => advancedCourse.titles.description);
+
+    fixture.detectChanges();
+    const tabs = el.queryAll(By.css('.mat-mdc-tab'));
+    expect(tabs.length).toBe(2, 'Unexpected number of tabs');
+
+    click(tabs[1]);
+    fixture.detectChanges();
+
+    let courseTitleList = null;
+    setTimeout(() => {
+      courseTitleList = el.queryAll(By.css('.mat-mdc-tab-body-active .mat-mdc-card-title')).map(element => element.nativeElement.innerText);
+    }, 500);
+
+    flush();
+    expect(courseTitleList).toEqual(advancedCourseTitleList, "Unknown advance courses");
+  }));
+
+  xit("should display advanced courses when tab clicked v4", fakeAsync(() => {
+    coursesService.findAllCourses.and.returnValue(
+      of(setupCourses())
+    );
+    fixture.detectChanges();
+
+    const tabs = el.queryAll(By.css('.mat-mdc-tab'));
+    expect(tabs.length).toBe(2, 'Unexpected number of tabs');
+
+    click(tabs[1]);
+    fixture.detectChanges();
+    flush();
+
+    const advancedCourseTitleList = advancedCourses.map(advancedCourse => advancedCourse.titles.description);
+    const courseTitleList = el.queryAll(By.css('.mat-mdc-tab-body-active .mat-mdc-card-title'))
+      .map(element => element.nativeElement.innerText);
+    expect(courseTitleList).toEqual(advancedCourseTitleList, "Unknown advance courses");
+  }));
+
+  fit("should display advanced courses when tab clicked v5", () => {
+    coursesService.findAllCourses.and.returnValue(
+      of(setupCourses())
+    );
+
+    fixture.detectChanges();
+    const tabs = el.queryAll(By.css('.mat-mdc-tab'));
+    expect(tabs.length).toBe(2, 'Unexpected number of tabs');
+
+    click(tabs[1]);
+    fixture.detectChanges();
+
+    Promise.resolve(
+      setTimeout(() => {
+        const advancedCourseTitleList = advancedCourses.map(advancedCourse => advancedCourse.titles.description);
+        const courseTitleList = el.queryAll(By.css('.mat-mdc-tab-body-active .mat-mdc-card-title'))
+          .map(element => element.nativeElement.innerText);
+        expect(courseTitleList).toEqual(advancedCourseTitleList, "Unknown advance courses");
+      }, 500)
+    );
   });
 
 });
